@@ -25,6 +25,7 @@ public class Messaging {
     private static final String IN_QUEUE = "webservice"; //dummy name
     private static final String OUT_QUEUE = "enricher_creditScore";;
     private Channel channel;
+    private Connection con;
     private QueueingConsumer consumer;        
    
     public Messaging(){
@@ -35,8 +36,8 @@ public class Messaging {
         
         Connection connection;
         try {
-            connection = factory.newConnection();
-            channel = connection.createChannel();
+            con = factory.newConnection();
+            channel = con.createChannel();
             channel.queueDeclare(IN_QUEUE, false, false, false, null);
             channel.queueDeclare(OUT_QUEUE, false, false, false, null);
             consumer = new QueueingConsumer(channel);
@@ -67,6 +68,7 @@ public class Messaging {
     private LoanResponse consumeMessage() throws InterruptedException, IOException{
         Delivery delivery = consumer.nextDelivery();
         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+        con.close();
         LoanResponse response = new LoanResponse();
         response.bankName = new String(delivery.getBody());
         return response;
