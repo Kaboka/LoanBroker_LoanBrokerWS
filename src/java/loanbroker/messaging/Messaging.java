@@ -11,6 +11,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
+import dk.cphbusiness.connection.ConnectionCreator;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,15 +30,9 @@ public class Messaging {
     private QueueingConsumer consumer;        
    
     public Messaging(){
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername("student");
-        factory.setPassword("cph");
-        factory.setHost("datdb.cphbusiness.dk");
-        
-        Connection connection;
+        ConnectionCreator creator = ConnectionCreator.getInstance();
         try {
-            con = factory.newConnection();
-            channel = con.createChannel();
+            channel = creator.createChannel();
             channel.queueDeclare(IN_QUEUE, false, false, false, null);
             channel.queueDeclare(OUT_QUEUE, false, false, false, null);
             consumer = new QueueingConsumer(channel);
