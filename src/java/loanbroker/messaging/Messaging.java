@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package loanbroker.messaging;
 
 import com.rabbitmq.client.Channel;
@@ -22,29 +21,29 @@ import loanbroker.dto.LoanResponse;
  * @author Kaboka
  */
 public class Messaging {
-    
+
     private static final String IN_QUEUE = "webservice"; //dummy name
-    private static final String OUT_QUEUE = "enricher_creditScore";;
+    private static final String OUT_QUEUE = "enricher_creditScore";
+    ;
     private Channel channel;
     private Connection con;
-    private QueueingConsumer consumer;        
-   
-    public Messaging(){
+    private QueueingConsumer consumer;
+
+    public Messaging() {
         ConnectionCreator creator = ConnectionCreator.getInstance();
         try {
             channel = creator.createChannel();
             channel.queueDeclare(IN_QUEUE, false, false, false, null);
             channel.queueDeclare(OUT_QUEUE, false, false, false, null);
             consumer = new QueueingConsumer(channel);
-            channel.basicConsume(IN_QUEUE,false, consumer);
+            channel.basicConsume(IN_QUEUE, false, consumer);
         } catch (IOException ex) {
             Logger.getLogger(Messaging.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
-    public LoanResponse getLoanRequest(String message){
-       LoanResponse response = null;
+
+    public LoanResponse getLoanRequest(String message) {
+        LoanResponse response = null;
         try {
             publishMessage(message);
             response = consumeMessage();
@@ -55,12 +54,12 @@ public class Messaging {
         }
         return response;
     }
-    
-    private void publishMessage(String message) throws IOException{
+
+    private void publishMessage(String message) throws IOException {
         channel.basicPublish("", OUT_QUEUE, null, message.getBytes());
     }
-    
-    private LoanResponse consumeMessage() throws InterruptedException, IOException{
+
+    private LoanResponse consumeMessage() throws InterruptedException, IOException {
         Delivery delivery = consumer.nextDelivery();
         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         con.close();
